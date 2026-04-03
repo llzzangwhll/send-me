@@ -14,20 +14,45 @@ import '../models/payment_card.dart';
 class CardDetailViewModel extends GetxController {
   final PaymentCard card;
   final screenshotController = ScreenshotController();
+  final amountController = TextEditingController();
+  final memoController = TextEditingController();
+  final amount = Rxn<int>();
+  final memo = ''.obs;
 
   CardDetailViewModel(this.card);
 
-  String get qrData => QrCodec.encode(card);
+  void onAmountChanged(String value) {
+    amount.value = AmountFormatter.parseAmount(value);
+  }
+
+  void onMemoChanged(String value) {
+    memo.value = value.trim();
+  }
+
+  PaymentCard get _cardWithAmount => PaymentCard(
+        id: card.id,
+        bankName: card.bankName,
+        accountNumber: card.accountNumber,
+        holderName: card.holderName,
+        amount: amount.value,
+        tossMeLink: card.tossMeLink,
+        kakaoPayLink: card.kakaoPayLink,
+        memo: memo.value.isEmpty ? null : memo.value,
+        createdAt: card.createdAt,
+        colorIndex: card.colorIndex,
+      );
+
+  String get qrData => QrCodec.encode(_cardWithAmount);
 
   String get accountInfoText {
     final buffer = StringBuffer();
     buffer.writeln('${card.bankName} ${card.accountNumber}');
     buffer.write('예금주: ${card.holderName}');
-    if (card.amount != null && card.amount! > 0) {
-      buffer.write('\n금액: ${AmountFormatter.formatAmount(card.amount!)}원');
+    if (amount.value != null && amount.value! > 0) {
+      buffer.write('\n금액: ${AmountFormatter.formatAmount(amount.value!)}원');
     }
-    if (card.memo != null && card.memo!.isNotEmpty) {
-      buffer.write('\n${card.memo}');
+    if (memo.value.isNotEmpty) {
+      buffer.write('\n${memo.value}');
     }
     return buffer.toString();
   }
@@ -58,11 +83,11 @@ class CardDetailViewModel extends GetxController {
     final text = StringBuffer();
     text.writeln('${card.holderName} ${card.bankName}');
     text.writeln('계좌번호: ${card.accountNumber}');
-    if (card.amount != null && card.amount! > 0) {
-      text.writeln('금액: ${AmountFormatter.formatAmount(card.amount!)}원');
+    if (amount.value != null && amount.value! > 0) {
+      text.writeln('금액: ${AmountFormatter.formatAmount(amount.value!)}원');
     }
-    if (card.memo != null && card.memo!.isNotEmpty) {
-      text.writeln(card.memo);
+    if (memo.value.isNotEmpty) {
+      text.writeln(memo.value);
     }
     if (card.tossMeLink != null && card.tossMeLink!.isNotEmpty) {
       final link = card.tossMeLink!;
@@ -108,5 +133,12 @@ class CardDetailViewModel extends GetxController {
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
+  }
+
+  @override
+  void onClose() {
+    amountController.dispose();
+    memoController.dispose();
+    super.onClose();
   }
 }

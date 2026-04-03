@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../core/constants.dart';
-import '../../core/utils/formatters.dart';
 import '../../models/payment_card.dart';
 import '../../viewmodels/card_editor_viewmodel.dart';
 
@@ -70,19 +69,6 @@ class CardEditorScreen extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              _buildSectionLabel('금액 (선택)'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: vm.amount,
-                decoration: const InputDecoration(
-                  hintText: '금액을 입력하세요',
-                  prefixIcon: Icon(Icons.payments_outlined),
-                  suffixText: '원',
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [AmountFormatter()],
-              ),
-              const SizedBox(height: 20),
               _buildSectionLabel('토스 링크 (선택)'),
               const SizedBox(height: 8),
               TextFormField(
@@ -109,17 +95,6 @@ class CardEditorScreen extends StatelessWidget {
                   hintText: 'https://qr.kakaopay.com/...',
                   prefixIcon: Icon(Icons.link),
                 ),
-              ),
-              const SizedBox(height: 20),
-              _buildSectionLabel('메모 (선택)'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: vm.memo,
-                decoration: const InputDecoration(
-                  hintText: '예: 4월 모임 회비',
-                  prefixIcon: Icon(Icons.note_outlined),
-                ),
-                maxLines: 2,
               ),
               const SizedBox(height: 24),
               _buildSectionLabel('카드 색상'),

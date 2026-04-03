@@ -1,4 +1,3 @@
-import 'package:SendMe/views/card_detail/widgets/qr_share_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -7,6 +6,7 @@ import '../../core/constants.dart';
 import '../../core/utils/formatters.dart';
 import '../../models/payment_card.dart';
 import '../../viewmodels/card_detail_viewmodel.dart';
+import '../../views/card_detail/widgets/qr_share_card.dart';
 import '../card_editor/card_editor_screen.dart';
 
 class CardDetailScreen extends StatelessWidget {
@@ -22,7 +22,7 @@ class CardDetailScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('계좌 상세'),
+        title: const Text('송금 요청'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
@@ -82,36 +82,16 @@ class CardDetailScreen extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  if (card.amount != null && card.amount! > 0) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      '${AmountFormatter.formatAmount(card.amount!)}원',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                  if (card.memo != null && card.memo!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      card.memo!,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // QR Code
+            // Amount & memo input
             Container(
-              padding: const EdgeInsets.all(24),
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -124,20 +104,59 @@ class CardDetailScreen extends StatelessWidget {
                 ],
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  QrImageView(
-                    data: vm.qrData,
-                    version: QrVersions.auto,
-                    size: 200,
-                    gapless: true,
-                    errorCorrectionLevel: QrErrorCorrectLevel.M,
+                  const Text(
+                    '받을 금액',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    '${card.bankName} · ${card.holderName}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
+                  TextField(
+                    controller: vm.amountController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [AmountFormatter()],
+                    onChanged: vm.onAmountChanged,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: '0',
+                      hintStyle: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey[300],
+                      ),
+                      suffixText: '원',
+                      suffixStyle: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: vm.memoController,
+                    onChanged: vm.onMemoChanged,
+                    decoration: InputDecoration(
+                      hintText: '메모 (선택)',
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                      prefixIcon: Icon(
+                        Icons.note_outlined,
+                        color: Colors.grey[400],
+                        size: 20,
+                      ),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 28,
+                      ),
                     ),
                   ),
                 ],
@@ -146,36 +165,98 @@ class CardDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Quick actions
-            Row(
-              children: [
-                Expanded(
-                  child: _ActionButton(
-                    icon: Icons.copy,
-                    label: '계좌 복사',
-                    onTap: vm.copyAccountInfo,
-                  ),
+            // QR Code - reactive
+            Obx(() {
+              // Access reactive values to trigger rebuild
+              vm.amount.value;
+              vm.memo.value;
+              return Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionButton(
-                    icon: Icons.image_outlined,
-                    label: 'QR 공유',
-                    onTap: () => vm.shareAsImage(
-                      QrShareCard(card: card),
+                child: Column(
+                  children: [
+                    QrImageView(
+                      data: vm.qrData,
+                      version: QrVersions.auto,
+                      size: 200,
+                      gapless: true,
+                      errorCorrectionLevel: QrErrorCorrectLevel.M,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${card.bankName} · ${card.holderName}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    if (vm.amount.value != null && vm.amount.value! > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          '${AmountFormatter.formatAmount(vm.amount.value!)}원',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: cardColor,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }),
+
+            const SizedBox(height: 24),
+
+            // Quick actions
+            Obx(() {
+              vm.amount.value;
+              vm.memo.value;
+              return Row(
+                children: [
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.copy,
+                      label: '계좌 복사',
+                      onTap: vm.copyAccountInfo,
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ActionButton(
-                    icon: Icons.share_outlined,
-                    label: '텍스트 공유',
-                    onTap: vm.shareAsText,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.image_outlined,
+                      label: 'QR 공유',
+                      onTap: () => vm.shareAsImage(
+                        QrShareCard(
+                          card: card,
+                          amount: vm.amount.value,
+                          memo: vm.memo.value.isEmpty ? null : vm.memo.value,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ActionButton(
+                      icon: Icons.share_outlined,
+                      label: '텍스트 공유',
+                      onTap: vm.shareAsText,
+                    ),
+                  ),
+                ],
+              );
+            }),
 
             // Payment links
             if (card.tossMeLink != null || card.kakaoPayLink != null) ...[
@@ -191,16 +272,14 @@ class CardDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              if (card.tossMeLink != null &&
-                  card.tossMeLink!.isNotEmpty)
+              if (card.tossMeLink != null && card.tossMeLink!.isNotEmpty)
                 _PaymentLinkButton(
                   label: '토스로 보내기',
                   subtitle: card.tossMeLink!,
                   color: const Color(0xFF3182F6),
                   onTap: vm.openTossLink,
                 ),
-              if (card.kakaoPayLink != null &&
-                  card.kakaoPayLink!.isNotEmpty)
+              if (card.kakaoPayLink != null && card.kakaoPayLink!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: _PaymentLinkButton(
@@ -213,54 +292,6 @@ class CardDetailScreen extends StatelessWidget {
                 ),
             ],
 
-            const SizedBox(height: 24),
-
-            // Detailed info
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    '상세 정보',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _InfoRow(
-                    label: '은행',
-                    value: card.bankName,
-                    onCopy: () => vm.copyField('은행명', card.bankName),
-                  ),
-                  _InfoRow(
-                    label: '계좌번호',
-                    value: card.accountNumber,
-                    onCopy: () =>
-                        vm.copyField('계좌번호', card.accountNumber),
-                  ),
-                  _InfoRow(
-                    label: '예금주',
-                    value: card.holderName,
-                    onCopy: () => vm.copyField('예금주', card.holderName),
-                  ),
-                  if (card.amount != null && card.amount! > 0)
-                    _InfoRow(
-                      label: '금액',
-                      value:
-                          '${AmountFormatter.formatAmount(card.amount!)}원',
-                      onCopy: () => vm.copyField(
-                          '금액', '${card.amount}'),
-                    ),
-                ],
-              ),
-            ),
             const SizedBox(height: 40),
           ],
         ),
@@ -365,57 +396,6 @@ class _PaymentLinkButton extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final VoidCallback onCopy;
-
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    required this.onCopy,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 72,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: onCopy,
-            child: Icon(
-              Icons.copy_outlined,
-              size: 18,
-              color: Colors.grey[400],
-            ),
-          ),
-        ],
       ),
     );
   }
