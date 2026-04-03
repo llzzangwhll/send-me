@@ -16,7 +16,7 @@ class HomeScreen extends GetView<HomeViewModel> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          '보내줘',
+          'Send Me',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [

@@ -28,7 +28,7 @@ class QrShareCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            '보내줘',
+            'Send Me',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

@@ -1,7 +1,7 @@
 import '../../models/payment_card.dart';
 
 class QrCodec {
-  static const String _header = '보내줘';
+  static const String _header = 'Send Me';
 
   static String encode(PaymentCard card) {
     final buffer = StringBuffer();

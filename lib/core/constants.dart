@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String appName = '보내줘';
+  static const String appName = 'Send Me';
   static const String hiveBoxName = 'payment_cards';
 
   static const List<String> bankList = [

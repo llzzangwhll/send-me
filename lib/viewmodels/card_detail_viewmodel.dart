@@ -71,7 +71,7 @@ class CardDetailViewModel extends GetxController {
 
     await Share.share(
       text.toString().trimRight(),
-      subject: '보내줘 - 계좌 정보',
+      subject: 'Send Me - 계좌 정보',
     );
   }
 

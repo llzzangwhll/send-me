@@ -14,7 +14,7 @@ class SendMeApp extends StatelessWidget {
     Get.put(HomeViewModel());
 
     return GetMaterialApp(
-      title: '보내줘',
+      title: 'Send Me',
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),

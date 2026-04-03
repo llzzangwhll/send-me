@@ -100,7 +100,7 @@ class _ScanScreenState extends State<ScanScreen> {
     } else {
       Get.snackbar(
         '인식 실패',
-        '보내줘 QR 코드가 아닙니다',
+        'Send Me QR 코드가 아닙니다',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.black87,
         colorText: Colors.white,
