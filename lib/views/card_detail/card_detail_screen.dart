@@ -274,20 +274,20 @@ class CardDetailScreen extends StatelessWidget {
               const SizedBox(height: 12),
               if (card.tossMeLink != null && card.tossMeLink!.isNotEmpty)
                 _PaymentLinkButton(
-                  label: '토스로 보내기',
+                  label: '토스 링크 공유',
                   subtitle: card.tossMeLink!,
                   color: const Color(0xFF3182F6),
-                  onTap: vm.openTossLink,
+                  onTap: vm.shareTossLink,
                 ),
               if (card.kakaoPayLink != null && card.kakaoPayLink!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: _PaymentLinkButton(
-                    label: '카카오페이로 보내기',
+                    label: '카카오페이 링크 공유',
                     subtitle: '카카오페이 송금',
                     color: const Color(0xFFFEE500),
                     textColor: Colors.black87,
-                    onTap: vm.openKakaoPayLink,
+                    onTap: vm.shareKakaoPayLink,
                   ),
                 ),
             ],
@@ -392,7 +392,7 @@ class _PaymentLinkButton extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.open_in_new, color: textColor, size: 20),
+              Icon(Icons.share, color: textColor, size: 20),
             ],
           ),
         ),

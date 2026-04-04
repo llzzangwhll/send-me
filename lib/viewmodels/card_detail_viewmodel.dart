@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../core/utils/formatters.dart';
 import '../core/utils/qr_codec.dart';
 import '../models/payment_card.dart';
@@ -118,21 +116,20 @@ class CardDetailViewModel extends GetxController {
     );
   }
 
-  Future<void> openTossLink() async {
+  Future<void> shareTossLink() async {
     if (card.tossMeLink == null || card.tossMeLink!.isEmpty) return;
     final link = card.tossMeLink!;
-    final url = Uri.parse(link.startsWith('http') ? link : 'https://$link');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    }
+    final url = link.startsWith('http') ? link : 'https://$link';
+    await Clipboard.setData(ClipboardData(text: url));
+    HapticFeedback.lightImpact();
+    await Share.share(url, subject: 'Send Me - 토스 송금 링크');
   }
 
-  Future<void> openKakaoPayLink() async {
+  Future<void> shareKakaoPayLink() async {
     if (card.kakaoPayLink == null || card.kakaoPayLink!.isEmpty) return;
-    final url = Uri.parse(card.kakaoPayLink!);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    }
+    await Clipboard.setData(ClipboardData(text: card.kakaoPayLink!));
+    HapticFeedback.lightImpact();
+    await Share.share(card.kakaoPayLink!, subject: 'Send Me - 카카오페이 송금 링크');
   }
 
   @override
